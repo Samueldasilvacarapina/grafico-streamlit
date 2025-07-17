@@ -49,8 +49,9 @@ dados_pendentes = texto_para_dict(pendentes_text)
 dados_finalizadas = texto_para_dict(finalizadas_text)
 
 def gerar_grafico(dados, titulo):
+    # Cria DataFrame e ORDENA ALFABETICAMENTE pela Tarefa
     df = pd.DataFrame(list(dados.items()), columns=["Tarefa", "Quantidade"])
-    df_sorted = df.sort_values(by="Quantidade")
+    df_sorted = df.sort_values(by="Tarefa")  # <-- ORDENA PELO NOME, NÃO PELO NÚMERO
 
     fig, ax = plt.subplots(figsize=(10, len(df)//2))
     bars = ax.barh(df_sorted["Tarefa"], df_sorted["Quantidade"], color="skyblue")
@@ -75,10 +76,9 @@ def salvar_pdf(fig):
 # Mostrar gráficos e botões
 if dados_pendentes:
     st.subheader("📌 Gráfico de Tarefas Pendentes")
-    fig_pendentes = gerar_grafico(dados_pendentes, "Pendentes")
+    fig_pendentes = gerar_grafico(dados_pendentes, "Pendentes (Ordenado A-Z)")
     st.pyplot(fig_pendentes)
 
-    # Botão para baixar pendentes
     buf_pendentes = salvar_pdf(fig_pendentes)
     st.download_button(
         label="📥 Baixar gráfico Pendentes (PDF)",
@@ -89,10 +89,9 @@ if dados_pendentes:
 
 if dados_finalizadas:
     st.subheader("✅ Gráfico de Tarefas Finalizadas")
-    fig_finalizadas = gerar_grafico(dados_finalizadas, "Finalizadas")
+    fig_finalizadas = gerar_grafico(dados_finalizadas, "Finalizadas (Ordenado A-Z)")
     st.pyplot(fig_finalizadas)
 
-    # Botão para baixar finalizadas
     buf_finalizadas = salvar_pdf(fig_finalizadas)
     st.download_button(
         label="📥 Baixar gráfico Finalizadas (PDF)",
@@ -100,5 +99,3 @@ if dados_finalizadas:
         file_name="grafico_finalizadas.pdf",
         mime="application/pdf"
     )
-
-#python -m streamlit run app.py
