@@ -38,40 +38,48 @@ def texto_para_dict(texto):
     for linha in texto.strip().split("\n"):
         if ":" in linha:
             chave, valor = linha.split(":", 1)
+            chave = chave.strip()
             try:
-                dados[chave.strip()] = int(valor.strip())
+                valor_int = int(valor.strip())
             except:
-                dados[chave.strip()] = 0
+                valor_int = 0
+            dados[chave] = valor_int
     return dados
 
-# Converter os textos para dicionários
-dados_pendentes = texto_para_dict(pendentes_text)
-dados_finalizadas = texto_para_dict(finalizadas_text)
-
 def gerar_grafico(dados, titulo):
-    # Cria DataFrame e ORDENA ALFABETICAMENTE pela Tarefa
     df = pd.DataFrame(list(dados.items()), columns=["Tarefa", "Quantidade"])
-    df_sorted = df.sort_values(by="Tarefa")  # <-- ORDENA PELO NOME, NÃO PELO NÚMERO
+    df_sorted = df.sort_values(by="Tarefa")  # ordena de A até Z
 
-    fig, ax = plt.subplots(figsize=(10, len(df)//2))
+    fig, ax = plt.subplots(figsize=(10, max(len(df)//2, 4)))
     bars = ax.barh(df_sorted["Tarefa"], df_sorted["Quantidade"], color="skyblue")
+
+    max_qtde = df_sorted["Quantidade"].max()
 
     for bar in bars:
         width = bar.get_width()
-        ax.text(width + max(df_sorted["Quantidade"])*0.01,
+        ax.text(width + max_qtde*0.01,
                 bar.get_y() + bar.get_height()/2,
-                str(int(width)), va='center')
+                str(int(width)),
+                va='center')
 
     ax.set_xlabel("Quantidade")
     ax.set_ylabel("Tarefa")
     ax.set_title(titulo)
+    
+    ax.invert_yaxis()  # Inverte o eixo Y para que fique do A no topo até Z embaixo
+    
     plt.tight_layout()
     return fig
 
 def salvar_pdf(fig):
     buf = BytesIO()
     fig.savefig(buf, format="PDF")
+    buf.seek(0)
     return buf
+
+# Converter os textos para dicionários
+dados_pendentes = texto_para_dict(pendentes_text)
+dados_finalizadas = texto_para_dict(finalizadas_text)
 
 # Mostrar gráficos e botões
 if dados_pendentes:
